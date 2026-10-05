@@ -8,10 +8,14 @@
 
 AERA_MAINTAINER := asdfmonster261
 
-AERA_SCREEN_H := 2400
-AERA_STATUS_H := 130
-AERA_STATUS_INDENT_LEFT := 80
-AERA_STATUS_INDENT_RIGHT := 80
+# The UI is laid out 1440 wide and scaled to the 1080x2342 cover panel. SCREEN_H is
+# in 1080-wide units; the status bar and indents are canvas units, so 4/3 of the
+# panel pixels they cover.
+AERA_UI_ADAPTIVE_RESOLUTION := true
+AERA_SCREEN_H := 2342
+AERA_STATUS_H := 173
+AERA_STATUS_INDENT_LEFT := 107
+AERA_STATUS_INDENT_RIGHT := 107
 AERA_HIDE_NOTCH := 1
 AERA_CLOCK_POS := 1
 AERA_ALLOW_DISABLE_NAVBAR := 0
