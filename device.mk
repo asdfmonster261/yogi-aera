@@ -6,7 +6,6 @@
 
 # device.mk — Package list, crypto config, and build props for Tensor-based Pixels.
 # Covers malibu (Tensor G6): yogi (Pixel 11 Pro Fold) and its Pixel 11 siblings.
-# Custom recovery modules (weaver, storageproxyd, etc.) are built from selfcode/.
 
 LOCAL_PATH := device/google/pixels
 
@@ -70,20 +69,6 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
 
 PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH)
 
-# Ramdisk snapshot tool (copies ramdisk state before LGZ decompression)
-PRODUCT_PACKAGES += \
-    ramdisk_snapshot
-
-# Persistent storage proxy for Trusty TEE RPMB (needed before keymint)
-PRODUCT_PACKAGES += \
-    recovery_storageproxyd
-
-# A14-native Weaver HAL proxy (talks to Titan M2 via /dev/gsc0 directly)
-PRODUCT_PACKAGES += \
-    recovery_weaver
-
-
-
 # Firstage ramdisk fstab (conf-malibu/f2fs -> fstab.malibu*, Tensor G6, UFS 3c2d0000)
 PRODUCT_PACKAGES += fstab.malibu.vendor_ramdisk
 PRODUCT_PACKAGES += fstab.malibu-fips.vendor_ramdisk
@@ -99,3 +84,6 @@ PRODUCT_PACKAGES += \
     fsck.vendor_ramdisk \
     tune2fs.vendor_ramdisk \
     e2fsck.vendor_ramdisk
+
+# AERA settings
+$(call inherit-product, $(LOCAL_PATH)/aera_pixels.mk)
