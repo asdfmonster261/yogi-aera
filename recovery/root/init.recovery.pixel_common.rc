@@ -28,9 +28,11 @@ on init
     setprop sys.usb.configfs 1
     setprop servicemanager true
     start vendor.boot-hal-1-2
-    # Set BOTH persist and runtime USB config to ensure triggers fire in recovery
+    # sys.usb.config is left to init.rc (adb) and to the recovery, which switches to
+    # mtp,adb when it starts MTP. Forcing mtp,adb here puts ffs.mtp in the gadget before
+    # anything has opened it, and the controller cannot bind until MTP runs, which is
+    # only after /data is decrypted.
     setprop persist.sys.usb.config mtp,adb
-    setprop sys.usb.config mtp,adb
     setprop vendor.usb.use_ffs_mtp 1
 
     # --- Security patch properties required by KeyMint patchlevel validation ---
@@ -63,7 +65,6 @@ on init
 
 on boot
     setprop persist.sys.usb.config mtp,adb
-    setprop sys.usb.config mtp,adb
     setprop vendor.usb.use_ffs_mtp 1
 
     # Clamp LTPO panel minimum refresh rate to 30Hz to prevent UI ghosting.
