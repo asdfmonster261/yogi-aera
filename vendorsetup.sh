@@ -77,6 +77,25 @@ if [ "$1" = "$FDEVICE" -o "$AERA_BUILD_DEVICE" = "$FDEVICE" ]; then
 	export AERA_ENABLE_KERNELSU_SUPPORT=1
 	export AERA_ENABLE_KERNELSU_NEXT_SUPPORT=1
 
+	# lgz packs the recovery ramdisk: the host build runs in aera_build_callback.sh and
+	# the static device build goes into the ramdisk, where init unpacks with it at boot.
+	# Z7_ST because the LZMA SDK's threading sources are not built.
+	lgz="$(gettop)/device/google/pixels/selfcode/lgz"
+	lzma="$(gettop)/external/lzma/C"
+	lzma_srcs="$lzma/Alloc.c $lzma/LzFind.c $lzma/LzmaDec.c $lzma/LzmaEnc.c $lzma/Lzma2Dec.c $lzma/Lzma2Enc.c $lzma/CpuArch.c"
+	clang_ver=$(sed -n 's/.*ClangDefaultVersion *= *"\(clang-r[0-9a-z]*\)".*/\1/p' "$(gettop)/build/soong/cc/config/global.go")
+	if [ "$lgz/lgzv3.c" -nt "$lgz/lgz_host_bin" ]; then
+		gcc -O3 -pipe -fopenmp -flto -march=native -I"$lzma" -DZ7_ST \
+			-o "$lgz/lgz_host_bin" "$lgz/lgzv3.c" $lzma_srcs || echo "  lgz: host build failed"
+	fi
+	if [ "$lgz/lgzv3.c" -nt "$lgz/lgz_device" ]; then
+		"$(gettop)/prebuilts/clang/host/linux-x86/$clang_ver/bin/clang" \
+			--target=aarch64-unknown-linux-musl --rtlib=compiler-rt -static -s -O2 \
+			--sysroot="$(gettop)/prebuilts/build-tools/sysroots/aarch64-unknown-linux-musl" \
+			-I"$lzma" -DZ7_ST -o "$lgz/lgz_device" "$lgz/lgzv3.c" $lzma_srcs || echo "  lgz: device build failed"
+	fi
+	unset lgz lzma lzma_srcs clang_ver
+
 	# Tensor recovery uses AIDL KeyMint; a stray keymaster version forces the legacy path.
 	unset AERA_DEFAULT_KEYMASTER_VERSION OF_DEFAULT_KEYMASTER_VERSION
 

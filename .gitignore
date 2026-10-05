@@ -1,2 +1,4 @@
 .build_platform.conf
 __pycache__/
+/selfcode/lgz/lgz_host_bin
+/selfcode/lgz/lgz_device
