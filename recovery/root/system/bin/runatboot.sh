@@ -17,7 +17,6 @@
 #   1. Device detection (ro.hardware → module list per device)
 #   2. A/B slot detection and vendor_dlkm module loading (touch, haptics)
 #   3. Vendor firmware copy (CS40L26 haptics) with slot fallback
-#   4. Magisk binary extraction and link creation
 #
 
 slot_detect() {
@@ -144,55 +143,6 @@ fix_kerror7() {
     umount /metadata
 }
 
-magisk_link_to_OF_FILES() {
-    Magisk_zip="$1"
-    mkdir -p /FFiles/OF_Magisk/ /sdcard/Fox/FoxFiles
-    cp -f "$Magisk_zip" /FFiles/OF_Magisk/Magisk.zip
-    cp -f "$Magisk_zip" /FFiles/OF_Magisk/uninstall.zip
-    magisk_on_data_media "$Magisk_zip" &
-}
-
-_bb_sleep() {
-    if [ -x "$_BB" ]; then "$_BB" sleep "$@"; else sleep "$@"; fi
-}
-
-_bb_mountpoint() {
-    if [ -x "$_BB" ]; then "$_BB" mountpoint "$@"; else mountpoint "$@"; fi
-}
-
-magisk_on_data_media(){
-    local Magisk_zip="$1"
-    while true; do
-        
-        if [ -d /data/media/0 ] && _bb_mountpoint -q /data; then
-            if [ ! -f /data/media/0/Fox/FoxFiles/Magisk.zip ] || [ ! -f /sdcard/Fox/FoxFiles/uninstall.zip ]; then
-                echo "I:magisk: Copying Magisk zip to /data/media/0 for sideload/install from stock recovery" >> "$LOGF"
-                mkdir -pv /data/media/0/Fox/FoxFiles
-                cp -f "$Magisk_zip" /data/media/0/Fox/FoxFiles/uninstall.zip
-            fi
-            if [ ! -f /data/media/0/Fox/FoxFiles/Magisk.zip ] || [ ! -f /sdcard/Fox/FoxFiles/Magisk.zip ]; then
-                echo "I:magisk: Copying Magisk zip to /data/media/0 for sideload/install from stock recovery" >> "$LOGF"
-                mkdir -pv /data/media/0/Fox/FoxFiles
-                cp -f "$Magisk_zip" /data/media/0/Fox/FoxFiles/Magisk.zip
-            fi
-            
-        fi
-        _bb_sleep 2
-    done
-}
-
-find_magisk_zip() {
-    local dir="$1"
-    local file
-    for file in "${dir}"/Magisk-*.zip; do
-        if [ -f "$file" ]; then
-            echo "$file"
-            return 0
-        fi
-    done
-    
-}
-
 #
 # load_susfs_rename_fix — insmod the Baseband Guard fast-symlink panic fix.
 #
@@ -229,27 +179,8 @@ load_susfs_rename_fix() {
     fi
 }
 
-TARGET_MAGISK_ZIP=$(find_magisk_zip /system/bin)
-
 setenforce 0
 LOGF="/tmp/recovery.log"
-
-# Dump busybox to /dev tmpfs so critical applets (sleep, mountpoint) survive
-# package manager operations (e.g. NikGapps) that may replace /system/bin.
-_BB_DIR="/dev/.fox_bb"
-_BB="$_BB_DIR/busybox"
-if [ -f /system/bin/busybox ]; then
-    mkdir -p "$_BB_DIR"
-    if cp -f /system/bin/busybox "$_BB" 2>/dev/null && chmod 755 "$_BB"; then
-        echo "I:busybox: Dumped to $_BB" >> "$LOGF"
-    else
-        _BB=""
-        echo "W:busybox: Failed to dump, will use PATH" >> "$LOGF"
-    fi
-else
-    _BB=""
-    echo "W:busybox: Not found in /system/bin, will use PATH" >> "$LOGF"
-fi
 
 chmod 777 /system/bin/*
 device_code=$(getprop ro.hardware)
@@ -337,10 +268,5 @@ else
 fi
 
 fix_kerror7
-if [ -n "$TARGET_MAGISK_ZIP" ]; then
-    magisk_link_to_OF_FILES "$TARGET_MAGISK_ZIP"
-else
-    echo "W:magisk: No Magisk zip found in /system/bin, skipping copy and link creation" >> "$LOGF"
-fi
 
 exit 0
