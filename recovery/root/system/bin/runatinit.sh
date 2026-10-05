@@ -66,10 +66,8 @@ apply_prop_file() {
 # Must run in runatinit.sh (early-init) — Process_Fstab() in twrp.cpp reads
 # twrp.flags BEFORE runatboot.sh is ever called.
 #
-# Two operations:
-#   1. USB OTG block device: next sdX letter after last internal UFS disk.
-#   2. Partition prune: remove by-name entries absent on this device.
-#      Logical mapper/* entries are never touched (not mapped yet).
+# Removes by-name entries absent on this device. Logical mapper/* entries
+# are never touched (not mapped yet).
 #
 # Safety: if ueventd coldboot is not done yet (by-name empty after wait),
 # the prune step is skipped entirely — never prunes on an empty /dev/block.
@@ -100,13 +98,7 @@ fix_twrp_flags() {
     done
     _log "  sd? after wait (i=$i): $(ls /dev/block/sd? 2>/dev/null | tr '\n' ' ')"
 
-    # --- 1. USB OTG ---
-    # The stick's sdX letter drifts across attach/detach, so a fixed flag cannot
-    # track it. /usb_otg points at /dev/block/otg-usb, a stable symlink that
-    # otg_yogi.sh keeps on the current removable USB disk.
-    _log "  USB OTG: /usb_otg -> /dev/block/otg-usb (maintained by otg_yogi.sh)"
-
-    # --- 2. Prune by-name entries absent on this device ---
+    # --- Prune by-name entries absent on this device ---
     # Safety guard: skip prune if by-name is not populated yet.
     local _bn_count
     _bn_count=$(ls /dev/block/platform/*/by-name/ 2>/dev/null | wc -l)
