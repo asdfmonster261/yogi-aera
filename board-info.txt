@@ -1,0 +1,1 @@
+require board=yogi|cubs|grizzly|kodiak
