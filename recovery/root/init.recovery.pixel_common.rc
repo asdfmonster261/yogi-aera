@@ -52,11 +52,7 @@ on init
     wait /dev/.recovery_sp_ready 5
 
     # Start KeyMint HAL (registers binder services for keystore2 → metadata decrypt)
-    # Both services are defined — the wrong one for the current SoC will fail
-    # harmlessly (binary missing or Trusty TA mismatch) and stop immediately.
-    # Zuma/Zumapro → Rust keymint; GS201 → C++ keymint.
     start vendor.keymint.rust-trusty
-    start vendor.keymint-trusty
 
     # --- Titan M2 / GSC init ---
     # Wait for GSC device (Titan M2 / Citadel chip — used for Weaver CE keys)
@@ -93,18 +89,7 @@ service recovery_storageproxyd /system/bin/recovery_storageproxyd \
 
 # Trusty TEE KeyMint HAL service (provides IKeyMintDevice/default for metadata decryption).
 # Binary from stock vendor partition — runs in recovery context.
-# --- Rust variant (Pixel 8/9 — Zuma/Zumapro) ---
 service vendor.keymint.rust-trusty /vendor/bin/hw/android.hardware.security.keymint-service.rust.trusty \
-        --dev /dev/trusty-ipc-dev0
-    class early_hal
-    user root
-    group root drmrpc
-    disabled
-    oneshot
-    seclabel u:r:recovery:s0
-
-# --- C++ variant (Pixel 7 — GS201) ---
-service vendor.keymint-trusty /vendor/bin/hw/android.hardware.security.keymint-service.trusty \
         --dev /dev/trusty-ipc-dev0
     class early_hal
     user root
