@@ -1,0 +1,14 @@
+<!-- The stock Pixel gralloc allocator and mapper. gpu_stage.sh copies both out of
+     the phone's vendor partition at early-boot, but servicemanager has read the
+     device manifest by then, so the declarations live in the ramdisk. -->
+<manifest version="9.0" type="device">
+    <hal format="aidl">
+        <name>android.hardware.graphics.allocator</name>
+        <version>2</version>
+        <fqname>IAllocator/default</fqname>
+    </hal>
+    <hal format="native">
+        <name>mapper</name>
+        <fqname>@5.0/pixel</fqname>
+    </hal>
+</manifest>
