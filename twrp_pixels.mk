@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-# twrp_pixels.mk - Product definition for OrangeFox Recovery on the Pixel 11 (malibu) family.
+# twrp_pixels.mk - Product definition for AERA Recovery on the Pixel 11 (malibu) family.
 # Builds one recovery image for the malibu (Tensor G6) family (set DEVICE_BUILD_FLAG=malibu):
 #   malibu: yogi (Pixel 11 Pro Fold) and its Pixel 11 siblings
 #
