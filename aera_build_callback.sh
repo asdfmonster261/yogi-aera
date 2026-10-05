@@ -26,6 +26,26 @@ mkdir -p "$TARGET_DIR/vendor"
 cp -af "$prebuilt/bin" "$prebuilt/etc" "$TARGET_DIR/vendor/" || exit 1
 chmod 755 "$TARGET_DIR"/vendor/bin/hw/* || exit 1
 
+# The PowerVR driver needs a newer libc++ than the recovery's, so AERA's renderer
+# loads it into a sphal namespace, the way Android loads a vendor driver into a
+# system process. gpu_stage.sh reads the shared list from here and copies everything
+# else the driver links into /vendor/lib64.
+ldconfig="$TARGET_DIR/system/etc/ld.config.txt"
+[ -f "$ldconfig" ] || fail "no $ldconfig"
+[ "$(grep '^\[' "$ldconfig" | tail -n 1)" = "[recovery]" ] ||
+    fail "$ldconfig does not end in the [recovery] section"
+grep -q '^namespace\.sphal\.' "$ldconfig" || cat >> "$ldconfig" <<'EOF'
+additional.namespaces = sphal
+namespace.sphal.isolated = true
+namespace.sphal.visible = true
+namespace.sphal.search.paths = /vendor/${LIB}/egl
+namespace.sphal.search.paths += /vendor/${LIB}/hw
+namespace.sphal.search.paths += /vendor/${LIB}
+namespace.sphal.permitted.paths = /vendor/${LIB}
+namespace.sphal.links = default
+namespace.sphal.link.default.shared_libs = libc.so:libdl.so:libm.so:liblog.so:libsync.so:libvndksupport.so:libbinder_ndk.so:libbinder.so
+EOF
+
 # LGZ. The recovery-mode ramdisk only loads below ~100 MiB, so binaries, libraries
 # and fonts are LZMA-packed here and unpacked by init at boot (subpatch 0001).
 # init and everything it links must stay as they are, or nothing can unpack them.
