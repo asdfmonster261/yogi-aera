@@ -1,7 +1,7 @@
 
-# init.recovery.usb.rc — USB gadget configfs setup for Zuma SoC Pixel recovery.
+# init.recovery.usb.rc - USB gadget configfs setup for the malibu Pixels.
 # Configures USB gadget g1 with ADB, MTP, PTP, and mass_storage functions.
-# DWC3 USB controller at 11210000, shared across all Zuma Pixels.
+# DWC3 USB controller at a210000.
 
 on early-boot
     mkdir /config
@@ -308,7 +308,7 @@ on property:sys.usb.config=none && property:sys.usb.configfs=1
     rm /config/usb_gadget/g1/configs/b.1/f3
     setprop sys.usb.state ${sys.usb.config}
 
-# Immediately acknowledge fastboot mode so TWRP/OrangeFox does not timeout while
+# Immediately acknowledge fastboot mode so recovery does not timeout while
 # fastbootd initializes (BootControl HAL + USB FFS endpoint setup, ~500ms).
 # The actual USB gadget hardware (UDC activation) is handled by the compound
 # trigger in stock init.rc once fastbootd sets sys.usb.ffs.ready=1.

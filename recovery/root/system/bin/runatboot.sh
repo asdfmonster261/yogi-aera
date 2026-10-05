@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#   runatboot.sh — OrangeFox Recovery early-boot script for Zuma SoC Pixels.
+#   runatboot.sh - early-boot script for the malibu Pixels.
 #
 #   This file is part of the OrangeFox Recovery Project
 #   Copyright (C) 2024-2026 The OrangeFox Recovery Project

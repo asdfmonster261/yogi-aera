@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-# BoardConfig.mk - Board-level configuration for OrangeFox Recovery.
+# BoardConfig.mk - Board-level configuration for AERA Recovery.
 # Family: malibu (Tensor G6, UFS 3c2d0000): yogi (Pixel 11 Pro Fold) and its Pixel 11
 # siblings. DEVICE_BUILD_FLAG is malibu.
 #

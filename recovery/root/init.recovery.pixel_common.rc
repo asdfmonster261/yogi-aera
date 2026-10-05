@@ -1,4 +1,4 @@
-# init.recovery.pixel_common.rc - OrangeFox Recovery for the Pixel 11 (malibu) family.
+# init.recovery.pixel_common.rc - recovery init for the Pixel 11 (malibu) family.
 # Shared init for the malibu (Tensor G6) family.
 #
 # This file is NOT auto-loaded by init (init only loads init.recovery.${ro.hardware}.rc).
@@ -6,8 +6,6 @@
 #
 # Init chain: kernel → init → init.recovery.{device}.rc → this file
 # Service chain: storageproxyd → keymint → weaver (for FBE CE decryption)
-# DOF_SCREEN_H is set in per-device stubs (e.g. init.recovery.yogi.rc) before
-# this file is imported, so it's available before data.cpp reads it.
 
 on early-init
     # Run device identity detection BEFORE on init/early-boot.

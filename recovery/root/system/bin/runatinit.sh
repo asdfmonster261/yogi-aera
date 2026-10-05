@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#   runatinit.sh — OrangeFox Recovery early-init device identity script.
+#   runatinit.sh - early-init device identity script for the malibu Pixels.
 #
 #   This file is part of the OrangeFox Recovery Project
 #   Copyright (C) 2024-2026 The OrangeFox Recovery Project
