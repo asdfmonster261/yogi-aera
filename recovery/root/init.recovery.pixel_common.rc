@@ -63,6 +63,11 @@ on init
     # Replaces both citadeld and weaver-service.citadel (no A15 deps).
     start recovery_weaver
 
+on early-boot
+    # AERA's renderer needs the phone's own PowerVR stack in RAM before the recovery
+    # service starts. A stuck mount must not hold up the boot, hence the timeout.
+    exec u:r:recovery:s0 root root -- /system/bin/timeout -k 5 30 /system/bin/sh /system/bin/gpu_stage.sh
+
 on boot
     setprop persist.sys.usb.config mtp,adb
     setprop vendor.usb.use_ffs_mtp 1
@@ -95,6 +100,16 @@ service vendor.keymint.rust-trusty /vendor/bin/hw/android.hardware.security.keym
     group root drmrpc
     disabled
     oneshot
+    seclabel u:r:recovery:s0
+
+# The stock gralloc allocator, run from the copy gpu_stage.sh staged; it is started by
+# that script. Vendor libraries come first because they need a newer libc++ than the
+# recovery's own.
+service aera_gpu_allocator /vendor/bin/hw/pixel.gralloc.allocator-service
+    user root
+    group root graphics drmrpc
+    setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib64/hw:/system/lib64
+    disabled
     seclabel u:r:recovery:s0
 
 # A14-native Weaver HAL — talks to Titan M2 directly via /dev/gsc0 one_pass_call.
