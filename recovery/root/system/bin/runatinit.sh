@@ -178,6 +178,13 @@ _log "  USB controller: a210000.dwc3 (malibu)"
 _log "--- calling fix_twrp_flags ---"
 fix_twrp_flags
 
+# The UI is drawn in software on one thread, and schedutil leaves the clusters near
+# their floor in recovery (mid measured at 533 of 3379 MHz), which makes it crawl.
+for g in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
+    echo performance > "$g" 2>/dev/null && _log "cpufreq: ${g%/*} -> performance" \
+        || _log "cpufreq: could not set $g"
+done
+
 _log "--- setprop servicemanager.ready ---"
 setprop servicemanager.ready true
 resetprop servicemanager.ready true
