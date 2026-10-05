@@ -43,6 +43,14 @@ PRODUCT_PACKAGES += \
     libsysutils \
     libhidltransport.vendor
 
+# Decryption: Trusty's RPMB storage proxy (KeyMint waits on it) and a Weaver HAL
+# that talks to the Titan M3 directly, for the credential-encrypted layer. The
+# Weaver AIDL library only has a system variant, so the HAL is built for system
+# and copied in, as bootctl is.
+PRODUCT_PACKAGES += \
+    recovery_storageproxyd
+RECOVERY_BINARY_SOURCE_FILES += $(TARGET_OUT_EXECUTABLES)/recovery_weaver
+
 RECOVERY_LIBRARY_SOURCE_FILES += \
     $(TARGET_OUT_SHARED_LIBRARIES)/libsysutils.so
 
