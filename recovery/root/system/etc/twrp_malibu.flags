@@ -49,11 +49,3 @@
 # 6. Misc / OTA state
 # ============================================================
 /misc                emmc    /dev/block/platform/3c2d0000.ufs/by-name/misc                      flags=display="Misc (OTA state, bootloader messages)";backup=1;flashimg=1
-
-# ============================================================
-# 7. External Storage (USB OTG)
-# The stick's sdX letter drifts across attach/detach, so this points at
-# /dev/block/otg-usb, a stable symlink otg_yogi.sh keeps on the current
-# removable USB disk. Do not pin a letter here.
-# ============================================================
-/usb_otg             auto    /dev/block/otg-usb                                                    flags=display="USB OTG (External Drive)";storage;wipeingui;removable;fsflags="utf8"
