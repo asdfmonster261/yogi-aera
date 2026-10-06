@@ -3,110 +3,33 @@
 # gpu_stage.sh - copy the phone's own PowerVR stack into RAM for AERA's GPU renderer.
 #
 # Run by init at early-boot, before the recovery service. It maps vendor, vendor_dlkm
-# and system read-only under dm names of its own, copies the driver, its firmware and
-# everything they link into the ramdisk, loads the kernel module, then drops every
-# mount and mapping again, so no partition is left busy. The renderer loads the driver
+# and system (see stage_lib.sh), copies the driver, its firmware and everything they
+# link into the ramdisk and loads the kernel module. The renderer loads the driver
 # into the sphal linker namespace, so anything the driver links has to end up under
 # /vendor/lib64 unless the recovery shares it (see /system/etc/ld.config.txt).
 
+NAME=gpu
 LOG=/dev/logs/gpu_stage.log
-WORK=/dev/aera-gpu
 ALLOCATOR=bin/hw/pixel.gralloc.allocator-service
+. /system/bin/stage_lib.sh
 
-mkdir -p /dev/logs $WORK
-exec >> $LOG 2>&1
-echo "start at $(cut -d' ' -f1 /proc/uptime)s"
-
-suffix=$(getprop ro.boot.slot_suffix)
 egl=$(getprop ro.hardware.egl)
-case $suffix in
-    _a) slot=0 ;;
-    _b) slot=1 ;;
-    *) echo "no slot suffix"; exit 1 ;;
-esac
 [ -n "$egl" ] || { echo "ro.hardware.egl is not set"; exit 1; }
 shared=" $(sed -n 's/^namespace\.sphal\.link\.default\.shared_libs = //p' /system/etc/ld.config.txt | tr : ' ') "
 [ "$shared" != "  " ] || { echo "ld.config.txt has no sphal namespace"; exit 1; }
 
-maps=""
-mounts=""
-staged=""
-
-release() {
-    for m in $mounts; do umount $m || echo "could not unmount $m"; done
-    for d in $maps; do dmctl delete $d > /dev/null || echo "could not delete $d"; done
-    rm -rf $WORK
-}
-
-fail() {
-    echo "failed: $*"
-    # A half-staged driver is worse than none: without one the renderer stays on
-    # its software path.
-    for f in $staged; do rm -f $f; done
-    release
-    exit 1
-}
-trap 'fail "timed out"' TERM
-
-# Map partition $1 of the booted slot from super's metadata and mount it read-only
-# on $2. AERA maps the same partitions itself later, under their own names.
-attach() {
-    local name=aera_gpu_$1 table dev i=0
-    # At early-boot this has failed with nothing logged, where the same steps later
-    # succeed, so keep every error and give it a few seconds.
-    while :; do
-        table=$(lpdump --slot=$slot /dev/block/by-name/super | awk -v p=$1$suffix '
-            $1 == "Name:" { cur = $2; next }
-            cur == p && $4 == "linear" { printf "linear %d %d /dev/block/by-name/%s %d ", $1, $3 - $1 + 1, $5, $6 }')
-        [ -n "$table" ] && dmctl create $name -ro $table > /dev/null && break
-        echo "$1$suffix not mappable at $(cut -d' ' -f1 /proc/uptime)s, table '$table'"
-        i=$((i + 1))
-        [ $i -lt 20 ] || return 1
-        sleep 0.25
-    done
-    maps="$name $maps"
-    dev=$(dmctl getpath $name)
-    i=0
-    while [ ! -b "$dev" ] && [ $i -lt 50 ]; do
-        sleep 0.1
-        i=$((i + 1))
-    done
-    mkdir -p $2
-    mount -t erofs -o ro $dev $2 2> /dev/null || mount -t ext4 -o ro $dev $2 || return 1
-    mounts="$2 $mounts"
-    echo "$1$suffix mapped at $dev"
-}
-
+attach vendor || fail "cannot map vendor$suffix"
+attach vendor_dlkm || fail "cannot map vendor_dlkm$suffix"
+attach system || fail "cannot map system$suffix"
 V=$WORK/vendor
-D=$WORK/vendor_dlkm
 S=$WORK/system
-attach vendor $V || fail "cannot map vendor$suffix"
-attach vendor_dlkm $D || fail "cannot map vendor_dlkm$suffix"
-attach system $S || fail "cannot map system$suffix"
 [ -d $S/system/lib64 ] && S=$S/system
-
-# Copy $1 to $2, leaving anything the ramdisk already has alone.
-put() {
-    [ -e $2 ] && return 0
-    mkdir -p ${2%/*}
-    cp -p $1 $2 || return 1
-    staged="$staged $2"
-}
 
 # pvrsrvkm asks for its firmware while it probes.
 for fw in $V/firmware/rgx.*; do
     put $fw /vendor/firmware/${fw##*/} || fail "cannot copy ${fw##*/}"
 done
-
-load() {
-    local mod=$1 dep
-    grep -q "^$(echo ${mod%.ko} | tr - _) " /proc/modules && return 0
-    for dep in $(sed -n "s|.*/$mod: *||p" $D/lib/modules/modules.dep); do
-        load ${dep##*/} || return 1
-    done
-    insmod $D/lib/modules/$mod
-}
-load pvrsrvkm.ko || fail "cannot load pvrsrvkm"
+load /vendor/lib/modules/pvrsrvkm.ko || fail "cannot load pvrsrvkm"
 
 queue=""
 seen=" "
