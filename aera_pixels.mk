@@ -29,6 +29,10 @@ AERA_FL_PATH1 := cmd:/system/bin/torch_ctl.sh
 # supplicant service is in init.recovery.pixel_common.rc.
 AERA_ENABLE_WLAN := 1
 
+# Haptics through the CS40L26's force-feedback input device; subpatch 0012 lets AERA
+# play the periodic effect it offers instead of rumble.
+AERA_SUPPORT_INPUT_FF_HAPTICS := true
+
 AERA_USE_LZ4_COMPRESSION := 1
 AERA_NO_TREBLE_COMPATIBILITY_CHECK := 1
 AERA_ENABLE_LPTOOLS := 1
