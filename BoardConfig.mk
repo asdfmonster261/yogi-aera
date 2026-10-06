@@ -209,6 +209,13 @@ TW_INCLUDE_FUSE_EXFAT := true
 TW_INCLUDE_FUSE_NTFS := true
 TW_INCLUDE_LPTOOLS := true
 
+# WLAN: AERA builds its own wpa_supplicant, for the bcmdhd chip over nl80211. AERA's
+# tree has no Broadcom private-command library, so no BOARD_WPA_SUPPLICANT_PRIVATE_LIB:
+# the supplicant falls back to its stub.
+BOARD_WLAN_DEVICE := bcmdhd
+BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+WPA_SUPPLICANT_VERSION := VER_0_8_X
+
 # TWRP Configuration - Vendor Modules (GKI only — monolithic kernels have all drivers built-in)
 # ifneq ($(FOX_KERNEL_TYPE),non-gki)
 # TW_LOAD_VENDOR_BOOT_MODULES := true

@@ -80,6 +80,16 @@ on boot
     # standard 30-120Hz panels are unaffected (sysfs won't exist on those).
     write /sys/devices/platform/exynos-drm/primary-panel/min_vrefresh 60
 
+# AERA turns WLAN on by setting sys.aera.wlan.up=1 and then waits for the supplicant's
+# control socket in /tmp/recovery/sockets. wifi_stage.sh sets sys.aera.wlan.ready once
+# the driver is loaded.
+on property:sys.aera.wlan.up=1 && property:sys.aera.wlan.ready=1
+    # The recovery creates the socket directory as root, but the supplicant switches
+    # to the wifi user as it starts and then cannot create its socket there.
+    mkdir /tmp/recovery/sockets 0770 wifi wifi
+    start wpa_supplicant
+    setprop sys.aera.wlan.up 0
+
 # ============================================================================
 # Services — custom HAL proxies for recovery environment
 # ============================================================================
@@ -113,6 +123,18 @@ service aera_gpu_allocator /vendor/bin/hw/pixel.gralloc.allocator-service
     group root graphics drmrpc
     setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib64/hw:/system/lib64
     disabled
+    seclabel u:r:recovery:s0
+
+# AERA's own supplicant, built for the bcmdhd driver. It is held to the recovery's
+# libraries, so anything missing there fails outright instead of resolving to one of
+# the Android 17 copies gpu_stage.sh puts under /vendor/lib64.
+service wpa_supplicant /system/bin/wpa_supplicant -iwlan0 -Dnl80211 \
+        -c/vendor/etc/wifi/wpa_supplicant.conf -O/tmp/recovery/sockets
+    user root
+    group root
+    setenv LD_LIBRARY_PATH /system/lib64
+    disabled
+    oneshot
     seclabel u:r:recovery:s0
 
 # A14-native Weaver HAL — talks to Titan M2 directly via /dev/gsc0 one_pass_call.
