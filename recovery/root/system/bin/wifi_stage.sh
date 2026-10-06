@@ -19,7 +19,14 @@ attach system_dlkm || fail "cannot map system_dlkm$suffix"
 # 4383 first. Load the one this phone's own insmod config names, as stock does.
 drv=$(sed -n 's/^modprobe|\(bcmdhd[^ ]*\.ko\).*/\1/p' \
     $WORK/vendor_dlkm/etc/init.insmod.$(getprop ro.hardware).cfg 2> /dev/null | head -n 1)
-[ -n "$drv" ] || drv=$(grep -m 1 '^bcmdhd' $WORK/vendor_dlkm/lib/modules/modules.load)
+# A custom kernel's vendor_dlkm may have no insmod config. The phone's own firmware then
+# names the chip.
+if [ -z "$drv" ]; then
+    chip=$(ls $WORK/vendor/firmware | sed -n 's/^fw_bcmdhd\.bin_\(43[0-9]*\)_.*/\1/p' | sort -u)
+    [ $(echo $chip | wc -w) = 1 ] && modfile bcmdhd$chip.ko > /dev/null && drv=bcmdhd$chip.ko
+fi
+[ -n "$drv" ] || drv=$(cat $WORK/vendor_dlkm/lib/modules/modules.load \
+    $WORK/vendor_dlkm/lib/modules/*/modules.load 2> /dev/null | sed -n 's#^.*/##; /^bcmdhd/p' | head -n 1)
 [ -n "$drv" ] || fail "vendor_dlkm has no bcmdhd driver"
 
 # The PCIe PHY loads its firmware as it probes and fails for good if the file is not
