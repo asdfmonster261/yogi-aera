@@ -178,6 +178,16 @@ _log "  USB controller: a210000.dwc3 (malibu)"
 _log "--- calling fix_twrp_flags ---"
 fix_twrp_flags
 
+# Flashable zips can read super's size from ro.dynamic.full_size. Read it off the
+# partition rather than build in a number that only fits some devices.
+super_size=$(blockdev --getsize64 /dev/block/by-name/super 2>/dev/null)
+if [ -n "$super_size" ]; then
+    resetprop ro.dynamic.full_size "$super_size"
+    _log "ro.dynamic.full_size=$super_size"
+else
+    _log "super not readable, ro.dynamic.full_size left unset"
+fi
+
 # The UI is drawn in software on one thread, and schedutil leaves the clusters near
 # their floor in recovery (mid measured at 533 of 3379 MHz), which makes it crawl.
 for g in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
