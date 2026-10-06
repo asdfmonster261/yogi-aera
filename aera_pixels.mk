@@ -42,5 +42,6 @@ AERA_USE_DMCTL := 1
 AERA_QUICK_BACKUP_LIST := /boot;/vendor_boot;/data;
 AERA_UNBIND_SDCARD_F2FS := 1
 AERA_BIND_MOUNT_SDCARD_ON_FORMAT := 1
-AERA_DYNAMIC_FULL_SIZE := 8531214336
+# No AERA_DYNAMIC_FULL_SIZE: runatinit.sh sets ro.dynamic.full_size from the super
+# partition itself, and a build-time value would override it.
 AERA_FORCE_DATA_FORMAT_F2FS := 1
