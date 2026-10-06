@@ -51,6 +51,12 @@ PRODUCT_PACKAGES += \
     recovery_storageproxyd
 RECOVERY_BINARY_SOURCE_FILES += $(TARGET_OUT_EXECUTABLES)/recovery_weaver
 
+# AERA's sandbox for its plugin apps (browser, Telegram, media and the rest); nothing
+# requests it otherwise. The browser's engine runtime comes from its plugin rather
+# than the image, which has no room for the 41 MB bundled one.
+PRODUCT_PACKAGES += \
+    aera-browser-jail
+
 RECOVERY_LIBRARY_SOURCE_FILES += \
     $(TARGET_OUT_SHARED_LIBRARIES)/libsysutils.so
 
