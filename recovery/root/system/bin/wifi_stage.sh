@@ -15,7 +15,11 @@ attach vendor_dlkm || fail "cannot map vendor_dlkm$suffix"
 # For rfkill, which cfg80211 needs and which is a GKI module.
 attach system_dlkm || fail "cannot map system_dlkm$suffix"
 
-drv=$(grep -m 1 '^bcmdhd' $WORK/vendor_dlkm/lib/modules/modules.load)
+# The other Pixel 11s ship both bcmdhd4383 and bcmdhd4390, and modules.load lists
+# 4383 first. Load the one this phone's own insmod config names, as stock does.
+drv=$(sed -n 's/^modprobe|\(bcmdhd[^ ]*\.ko\).*/\1/p' \
+    $WORK/vendor_dlkm/etc/init.insmod.$(getprop ro.hardware).cfg 2> /dev/null | head -n 1)
+[ -n "$drv" ] || drv=$(grep -m 1 '^bcmdhd' $WORK/vendor_dlkm/lib/modules/modules.load)
 [ -n "$drv" ] || fail "vendor_dlkm has no bcmdhd driver"
 
 # The PCIe PHY loads its firmware as it probes and fails for good if the file is not
