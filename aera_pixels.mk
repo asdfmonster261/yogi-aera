@@ -25,6 +25,10 @@ AERA_USE_GREEN_LED := 0
 # The LM3644 flash LED is driven over I2C by a script, not a sysfs LED.
 AERA_FL_PATH1 := cmd:/system/bin/torch_ctl.sh
 
+# WLAN. wifi_stage.sh loads the phone's own bcmdhd driver at early-boot, and the
+# supplicant service is in init.recovery.pixel_common.rc.
+AERA_ENABLE_WLAN := 1
+
 AERA_USE_LZ4_COMPRESSION := 1
 AERA_NO_TREBLE_COMPATIBILITY_CHECK := 1
 AERA_ENABLE_LPTOOLS := 1
