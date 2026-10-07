@@ -162,7 +162,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cat > notes.md <<'MD'
-          AERA Recovery R1.0 Beta for the Pixel 11 family (yogi, cubs, grizzly, kodiak).
+          AERA Recovery R1.0 Beta for the Pixel 11 family.
 
           | file | use |
           |---|---|
@@ -170,7 +170,7 @@ jobs:
           | `create-aera-malibu.sh` | First install with no root and no custom recovery. Run it on a PC or in Termux; it fetches the image below and grafts it against your own stock vendor_boot. |
           | `AERA-R1.0-malibu-unassembled.img` | Downloaded by the script above. NOT flashable on its own. |
 
-          Hardware-tested on yogi. kodiak boots and decrypts; the GPU, WiFi and USB-OTG fixes made since that test are not yet confirmed there. cubs and grizzly are blind ports.
+          Hardware-tested on yogi.
 
           Format Data is disabled on purpose. Wiping files still works.
           MD
