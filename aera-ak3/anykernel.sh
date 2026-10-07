@@ -33,6 +33,35 @@ do.cleanuponabort=0
 BLOCK=vendor_boot;
 IS_SLOT_DEVICE=1;
 
+RUN_SLOT=$(grep '^androidboot.slot_suffix = ' /proc/bootconfig 2>/dev/null | cut -d'"' -f2);
+
+# Right after an update the bootloader is set to boot the other slot, while
+# bootconfig still names this one, so installing here would leave the updated slot
+# with stock recovery. The Pixel boot control service keeps that state in devinfo.
+# Read it directly: AK3 mounts Android's /system over the recovery's, so the
+# recovery's bootctl is out of reach. Take the other slot only in the exact state an
+# update leaves (other slot active, bootable, never marked successful, retries left;
+# this one inactive). Anything else, an unreadable devinfo included, keeps the
+# running slot.
+updated_slot() {
+  local run other tries next;
+  set -- $(dd if=/dev/block/by-name/devinfo bs=128 count=1 2>/dev/null | od -An -tu1 -v);
+  [ $# -eq 128 ] && [ "$1 $2 $3 $4" = "68 69 86 73" ] || return 1;
+  # A/B data needs devinfo version 3.3 or later.
+  [ $(( ($6 << 24) | ($5 << 16) | ($8 << 8) | $7 )) -ge 196611 ] || return 1;
+  # Slot records at bytes 48 and 52: retry count, then flags (1 unbootable,
+  # 2 successful, 4 active).
+  case "$RUN_SLOT" in
+    _a) run=${50}; other=${54}; tries=${53}; next=_b;;
+    _b) run=${54}; other=${50}; tries=${49}; next=_a;;
+    *) return 1;;
+  esac;
+  [ $((other & 7)) -eq 4 ] && [ "$tries" -gt 0 ] && [ $((run & 4)) -eq 0 ] || return 1;
+  echo $next;
+}
+SLOT_TARGET=$RUN_SLOT; UPDATED=;
+v=$(updated_slot) && { SLOT_TARGET=$v; UPDATED=1; };
+
 # In a TWRP-based recovery the toolbox getprop is a symlink needing
 # LD_LIBRARY_PATH, which AK3 unsets, so getprop ro.boot.slot_suffix returns empty and
 # setup_ak aborts with "Unable to determine active slot". The slot is in
@@ -41,6 +70,8 @@ IS_SLOT_DEVICE=1;
 getprop() {
   local k="$1" v;
   case "$k" in
+    ro.boot.slot_suffix)
+      [ "$SLOT_TARGET" ] && { echo "$SLOT_TARGET"; return 0; };;
     ro.boot.*)
       v=$(grep "^androidboot.${k#ro.boot.} = " /proc/bootconfig 2>/dev/null | cut -d'"' -f2);
       [ "$v" ] && { echo "$v"; return 0; };;
@@ -99,7 +130,11 @@ ui_print " ";
 ui_print "  AERA recovery for the Pixel 11 family (repack installer)";
 ui_print "  grafts AERA onto your own vendor_boot first-stage";
 ui_print " ";
-ui_print "  slot   : ${SLOT:-none}";
+if [ "$UPDATED" ]; then
+  ui_print "  slot   : $SLOT, made active by an update (running $RUN_SLOT)";
+else
+  ui_print "  slot   : ${SLOT:-none}";
+fi;
 
 check_device;
 ui_print "  device : $DEVICE";
@@ -115,11 +150,18 @@ $bb rm -rf "$WORK"; $bb mkdir -p "$WORK/stock" "$WORK/aera";
 # The inactive slot is not a fallback under Virtual A/B, so this backup and
 # fastboot are the way back.
 $bb dd if="$BLOCK" of="$WORK/stock/vb.img" bs=1048576 2>/dev/null || abort "  ! could not read vendor_boot. Aborting.";
-bk=$BKDIR/vendor_boot-before.img;
-if [ ! -f "$bk" ]; then
+if [ "$UPDATED" ]; then
+  # The updated slot now holds that update's own stock vendor_boot, the one to go
+  # back to, so take it fresh.
+  bk=$BKDIR/vendor_boot$SLOT-update.img;
   $bb cp -f "$WORK/stock/vb.img" "$bk" && ui_print "  backup : $bk" || abort "  ! refusing to write without a backup. Aborting.";
 else
-  ui_print "  backup : $bk (kept existing)";
+  bk=$BKDIR/vendor_boot-before.img;
+  if [ ! -f "$bk" ]; then
+    $bb cp -f "$WORK/stock/vb.img" "$bk" && ui_print "  backup : $bk" || abort "  ! refusing to write without a backup. Aborting.";
+  else
+    ui_print "  backup : $bk (kept existing)";
+  fi;
 fi;
 
 # AERA's image has two fragments: a generic platform we discard, and the
@@ -170,7 +212,11 @@ fi;
 $bb rm -rf "$WORK";
 
 ui_print " ";
-ui_print "  Done. Reboot to recovery to run AERA.";
+if [ "$UPDATED" ]; then
+  ui_print "  Done. $SLOT boots next; reboot to recovery to run AERA there.";
+else
+  ui_print "  Done. Reboot to recovery to run AERA.";
+fi;
 ui_print " ";
 ui_print "  Backup is at $bk - pull it to a PC now:";
 ui_print "    adb pull $bk";
