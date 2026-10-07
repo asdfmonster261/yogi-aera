@@ -218,14 +218,6 @@ BOARD_WLAN_DEVICE := bcmdhd
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 
-# TWRP Configuration - Vendor Modules (GKI only — monolithic kernels have all drivers built-in)
-# ifneq ($(FOX_KERNEL_TYPE),non-gki)
-# TW_LOAD_VENDOR_BOOT_MODULES := true
-# TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
-# endif
-
-
-
 # Vendor Boot
 BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
 BOARD_INCLUDE_RECOVERY_RAMDISK_IN_VENDOR_BOOT := true

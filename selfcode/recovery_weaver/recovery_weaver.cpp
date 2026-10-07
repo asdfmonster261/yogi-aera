@@ -1,5 +1,5 @@
 /*
- * recovery_weaver - A14-native Weaver HAL proxy for Pixel recovery
+ * recovery_weaver - Weaver HAL proxy for the Pixel recovery
  *
  * Talks to the GSC (Titan) directly via /dev/gsc0 one_pass_call ioctl and
  * registers IWeaver/default on binder for CE FBE decryption.

@@ -39,7 +39,7 @@ PRODUCT_EXTRA_RECOVERY_KEYS += \
     device/google/pixels/security/google-ota \
     device/google/pixels/security/heybooboo-ota
 
-# Product Name — "pixels" is a universal target covering all Tensor SoC Pixels.
+# Product name: "pixels" is the one target for every malibu Pixel.
 # The recovery image auto-detects the device at runtime via ro.hardware.
 PRODUCT_RELEASE_NAME := pixels
 PRODUCT_DEVICE := $(PRODUCT_RELEASE_NAME)

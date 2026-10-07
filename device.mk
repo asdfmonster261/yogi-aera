@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-# device.mk — Package list, crypto config, and build props for Tensor-based Pixels.
+# device.mk: package list, crypto config and build props for the malibu Pixels.
 # Covers malibu (Tensor G6): yogi (Pixel 11 Pro Fold) and its Pixel 11 siblings.
 
 LOCAL_PATH := device/google/pixels
