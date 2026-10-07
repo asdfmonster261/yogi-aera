@@ -1,4 +1,4 @@
-# recovery.fstab — Partition layout for Malibu SoC (Tensor G6) Pixel devices.
+# recovery.fstab: partition layout for the Malibu SoC (Tensor G6) Pixels.
 # UFS controller at 3c2d0000, DWC3 USB at a210000 via a200000.usb3.
 # Device: yogi (Pixel 11 Pro Fold).
 #

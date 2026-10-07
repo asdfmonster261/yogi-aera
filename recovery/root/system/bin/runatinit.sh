@@ -63,14 +63,14 @@ apply_prop_file() {
 }
 
 # Dynamically patches /system/etc/twrp.flags before TWRP reads it.
-# Must run in runatinit.sh (early-init) — Process_Fstab() in twrp.cpp reads
+# Must run in runatinit.sh (early-init): Process_Fstab() in twrp.cpp reads
 # twrp.flags BEFORE runatboot.sh is ever called.
 #
 # Removes by-name entries absent on this device. Logical mapper/* entries
 # are never touched (not mapped yet).
 #
 # Safety: if ueventd coldboot is not done yet (by-name empty after wait),
-# the prune step is skipped entirely — never prunes on an empty /dev/block.
+# the prune step is skipped entirely, so it never prunes on an empty /dev/block.
 fix_twrp_flags() {
     local flags_file="/system/etc/twrp.flags"
     _log "--- fix_twrp_flags ---"

@@ -1,4 +1,4 @@
-# twrp_malibu.flags — Tensor G6 (malibu / yogi, Pixel 11 Pro Fold) | UFS @ 3c2d0000
+# twrp_malibu.flags: Tensor G6 (malibu / yogi, Pixel 11 Pro Fold) | UFS @ 3c2d0000
 # Structure mirrors twrp.flags; UFS controller 3c2d0000, USB OTG via a210000.dwc3.
 #
 # The bootloader chain (abl, bl31, tzsw, pvmfw, gsa_bl1, gsa_fw, cap, cpm, dbc,

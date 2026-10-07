@@ -144,7 +144,7 @@ fix_kerror7() {
 }
 
 #
-# load_susfs_rename_fix — insmod the Baseband Guard fast-symlink panic fix.
+# load_susfs_rename_fix: insmod the Baseband Guard fast-symlink panic fix.
 #
 # Baseband Guard's bb_inode_rename LSM hook calls page_get_link() to resolve
 # symlink targets. On rootfs/tmpfs "fast symlinks" (target stored inline in

@@ -1,5 +1,5 @@
 #!/system/bin/sh
-# setup_cpu_temp.sh — Find the CPU "BIG" cluster thermal zone and create a stable
+# setup_cpu_temp.sh: find the CPU "BIG" cluster thermal zone and create a stable
 # /dev/thermal_cpu symlink for TWRP's TW_CUSTOM_CPU_TEMP_PATH.
 #
 # Thermal zone numbering varies in recovery, so enumerate all zones, match the

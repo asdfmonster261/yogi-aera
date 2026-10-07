@@ -20,7 +20,7 @@
         <fqname>@1.0::IGatekeeper/default</fqname>
     </hal>
     <!-- KeyMint/SecureClock/SharedSecret: injected per-platform via prebuilt/binary/{platform}/ -->
-    <!-- AIDL Weaver (Citadel/Titan M2) for CE FBE credential-encrypted key escrow -->
+    <!-- AIDL Weaver (Titan M3) for CE key escrow -->
     <hal format="aidl">
         <name>android.hardware.weaver</name>
         <version>2</version>

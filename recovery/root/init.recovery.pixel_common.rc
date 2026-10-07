@@ -38,7 +38,7 @@ on init
     # --- Security patch properties required by KeyMint patchlevel validation ---
     # Without these, keymint panics on startup (regex mismatch on empty string).
     # Using 2099-12-31 ensures patchlevel >= any key creation date (upgrade always allowed).
-    # These are fallbacks — prop.default should already set them, but may fail to load.
+    # Fallbacks: prop.default should already set these, but it may fail to load.
     setprop ro.build.version.security_patch "2099-12-31"
     setprop ro.vendor.build.security_patch "2099-12-31"
 
@@ -46,7 +46,7 @@ on init
     # Wait for Trusty IPC device (created by trusty-ipc kernel module)
     wait /dev/trusty-ipc-dev0 10
 
-    # Start storage proxy FIRST — keymint needs RPMB access via Trusty
+    # Start the storage proxy first: KeyMint needs RPMB access through Trusty
     start recovery_storageproxyd
     # Wait for proxy to connect to Trusty before starting keymint
     wait /dev/.recovery_sp_ready 5
@@ -54,13 +54,13 @@ on init
     # Start KeyMint HAL (registers binder services for keystore2 → metadata decrypt)
     start vendor.keymint.rust-trusty
 
-    # --- Titan M2 / GSC init ---
-    # Wait for GSC device (Titan M2 / Citadel chip — used for Weaver CE keys)
+    # --- Titan M3 / GSC init ---
+    # Wait for the GSC device (the Titan M3, which holds the Weaver slots for CE keys)
     wait /dev/gsc0 10
 
-    # Start recovery_weaver — talks to Titan M2 directly via /dev/gsc0,
-    # registers IWeaver/default for CE FBE decryption.
-    # Replaces both citadeld and weaver-service.citadel (no A15 deps).
+    # Start recovery_weaver: it talks to the Titan M3 directly through /dev/gsc0
+    # and registers IWeaver/default for CE decryption.
+    # It stands in for the stock citadeld and weaver-service.citadel.
     start recovery_weaver
 
 on early-boot
@@ -93,7 +93,7 @@ on property:sys.aera.wlan.up=1 && property:sys.aera.wlan.ready=1
     setprop sys.aera.wlan.up 0
 
 # ============================================================================
-# Services — custom HAL proxies for recovery environment
+# Services: HAL proxies for the recovery
 # ============================================================================
 
 # Persistent storage proxy daemon for Trusty TEE RPMB access.
@@ -107,7 +107,7 @@ service recovery_storageproxyd /system/bin/recovery_storageproxyd \
     seclabel u:r:recovery:s0
 
 # Trusty TEE KeyMint HAL service (provides IKeyMintDevice/default for metadata decryption).
-# Binary from stock vendor partition — runs in recovery context.
+# The binary comes from the stock vendor partition and runs in the recovery's context.
 service vendor.keymint.rust-trusty /vendor/bin/hw/android.hardware.security.keymint-service.rust.trusty \
         --dev /dev/trusty-ipc-dev0
     class early_hal
@@ -147,8 +147,8 @@ service aera_otg /system/bin/sh /system/bin/aera_otg.sh
     disabled
     seclabel u:r:recovery:s0
 
-# A14-native Weaver HAL — talks to Titan M2 directly via /dev/gsc0 one_pass_call.
-# Replaces citadeld + weaver-service.citadel (no A15 vendor dependencies).
+# Weaver HAL built for this recovery: talks to the Titan M3 directly through /dev/gsc0 one_pass_call.
+# It stands in for the stock citadeld and weaver-service.citadel.
 # Provides IWeaver/default binder service for CE FBE key derivation.
 service recovery_weaver /system/bin/recovery_weaver
     user root
