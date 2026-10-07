@@ -69,6 +69,12 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.hardware.keystore=trusty \
     ro.hardware.gatekeeper=trusty
 
+# Saved WiFi and NAS passwords: AERA's default key includes ro.boot.vbmeta.digest,
+# which changes with every OTA and kernel flash, and every saved password with it.
+# The stable key leaves the digest out and re-seals old entries it can still open.
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.aera.stable_secret_key=1
+
 # Metadata
 BOARD_USES_METADATA_PARTITION := true
 
