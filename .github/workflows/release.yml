@@ -172,7 +172,7 @@ jobs:
 
           Hardware-tested on yogi.
 
-          Format Data is disabled on purpose. Wiping files still works.
+          Format Data erases the phone the way a stock factory reset does, and Android sets up /data again on its next boot.
           MD
           # The checkout is in devicetree/, so gh cannot find the repository from here.
           gh release create "${{ inputs.release_tag }}" out/* \
