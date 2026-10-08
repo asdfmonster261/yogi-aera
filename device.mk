@@ -51,6 +51,10 @@ PRODUCT_PACKAGES += \
     recovery_storageproxyd
 RECOVERY_BINARY_SOURCE_FILES += $(TARGET_OUT_EXECUTABLES)/recovery_weaver
 
+# Format Data: erases the Titan M3's user secrets, as the stock factory reset does.
+# Built on stock's own Titan M client library, which also only has a system variant.
+RECOVERY_BINARY_SOURCE_FILES += $(TARGET_OUT_EXECUTABLES)/titan_wipe
+
 # AERA's sandbox for its plugin apps (browser, Telegram, media and the rest); nothing
 # requests it otherwise. The browser's engine runtime comes from its plugin rather
 # than the image, which has no room for the 41 MB bundled one.
