@@ -188,12 +188,14 @@ else
     _log "super not readable, ro.dynamic.full_size left unset"
 fi
 
-# The UI is drawn in software on one thread, and schedutil leaves the clusters near
-# their floor in recovery (mid measured at 533 of 3379 MHz), which makes it crawl.
+# No thermal daemon runs in recovery, so the clocks set here are held all
+# session. performance keeps the UI off the cluster floors, cpu_caps.sh keeps
+# every cluster under its ceiling.
 for g in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
     echo performance > "$g" 2>/dev/null && _log "cpufreq: ${g%/*} -> performance" \
         || _log "cpufreq: could not set $g"
 done
+/system/bin/cpu_caps.sh 0
 
 _log "--- setprop servicemanager.ready ---"
 setprop servicemanager.ready true
