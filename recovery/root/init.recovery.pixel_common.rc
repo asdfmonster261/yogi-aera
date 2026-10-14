@@ -77,6 +77,9 @@ on boot
     setprop persist.sys.usb.config mtp,adb
     setprop vendor.usb.use_ffs_mtp 1
 
+    # thermal_watch tightens the cpu_caps.sh caps when the phone runs warm.
+    start thermal_watch
+
     # Clamp LTPO panel minimum refresh rate to 30Hz to prevent UI ghosting.
     # LTPO panels idle at 1Hz causing visible ghosting;
     # standard 30-120Hz panels are unaffected (sysfs won't exist on those).
@@ -142,6 +145,13 @@ service wpa_supplicant /system/bin/wpa_supplicant -iwlan0 -Dnl80211 \
 # Keeps the AoC's USB host vote up and /dev/block/otg-usb on the attached stick;
 # started by otg_stage.sh.
 service aera_otg /system/bin/sh /system/bin/aera_otg.sh
+    user root
+    group root
+    disabled
+    seclabel u:r:recovery:s0
+
+# Backs the cpu_caps.sh caps off on heat; started on boot.
+service thermal_watch /system/bin/sh /system/bin/thermal_watch.sh
     user root
     group root
     disabled
