@@ -11,10 +11,12 @@ class SubPatch(BaseSubPatch):
             (
                 r"""
     PollAutomaticUpdates();
+    PollPcConnection();
     PollRecentsHold();
 """,
                 r"""
     PollAutomaticUpdates();
+    PollPcConnection();
     PollCheckpointNotice();
     PollRecentsHold();
 """
