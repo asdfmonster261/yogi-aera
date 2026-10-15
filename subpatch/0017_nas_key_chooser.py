@@ -115,20 +115,28 @@ NasStatus RecoveryNasStatus() {
                 (
                     r"""
 #include <algorithm>
+#include <atomic>
+#include <memory>
 #include <string>
+#include <thread>
 
+#include "nas/smb_browser.hpp"
 #include "phone_keyboard.hpp"
 """,
                     r"""
 #include <algorithm>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <dirent.h>
+#include <memory>
 #include <string>
 #include <sys/stat.h>
+#include <thread>
 #include <unistd.h>
 #include <vector>
 
+#include "nas/smb_browser.hpp"
 #include "phone_keyboard.hpp"
 """
                 ),
@@ -342,12 +350,14 @@ void SelectProtocol(NasUi *state, const char *type) {
                 (
                     r"""
   } else {
+    AddField(state, 0, y, Field::kPath);
     AddCacheCard(state, 672, y);
   }
 }
 """,
                     r"""
   } else {
+    AddField(state, 0, y, Field::kPath);
     AddCacheCard(state, 672, y);
     y += 180;
     AddKeyCard(state, 0, y);
