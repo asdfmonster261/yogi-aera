@@ -102,19 +102,4 @@ bool Verify(const std::string &content, const std::string &signature_text) {
 }
 """
             ),
-            (
-                r"""
-    gCatalog = parsed; return parsed;
-  }
-  return {BrowserFallback()};
-}
-""",
-                r"""
-    gCatalog = parsed; return parsed;
-  }
-  // No catalog fetched yet: nothing to offer, rather than AERA's browser.
-  return {};
-}
-"""
-            ),
         ]
